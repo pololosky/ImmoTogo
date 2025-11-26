@@ -23,3 +23,4 @@ class FavorisPage extends StatelessWidget {
     );
   }
 }
+// Flora est passée par ici

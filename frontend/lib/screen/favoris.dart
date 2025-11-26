@@ -8,3 +8,4 @@ class FavorisPage extends StatelessWidget {
     return const Placeholder();
   }
 }
+// Flora est passée par ici

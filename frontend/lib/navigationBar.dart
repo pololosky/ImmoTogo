@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/config/colorParams.dart';
 import 'screen/acceuil.dart';
 import 'screen/favoris.dart';
 import 'screen/parametre.dart';
@@ -15,10 +16,10 @@ class _NavigationState extends State<Navigation> {
 
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    AcceuilPage(),
-    RecherchePage(),
-    FavorisPage(),
+  static final List<Widget> _widgetOptions = <Widget>[
+    const AcceuilPage(),
+    const RecherchePage(),
+    const FavorisPage(),
     ParametrePage(),
   ];
 
@@ -33,6 +34,11 @@ class _NavigationState extends State<Navigation> {
     return Scaffold(
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: AppConfig.primaryColor,
+        unselectedItemColor: Colors.grey[600],
+        showUnselectedLabels: true,
+        // c'est sa qui empeche les icon selectionner de bouger
+        type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
 
           BottomNavigationBarItem(
@@ -59,7 +65,6 @@ class _NavigationState extends State<Navigation> {
 
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
         onTap: _onItemTapped,
       ),
     );

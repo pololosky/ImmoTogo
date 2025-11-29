@@ -1,0 +1,60 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Utilisateur (vendeur ou acheteur potentiel)
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String     @unique
+  name      String?
+  password  String
+  phone     String?
+  properties Property[] // Les biens mis en vente par cet utilisateur
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+// Type de bien (Maison, Appartement, Terrain)
+enum PropertyType {
+  MAISON
+  APPARTEMENT
+  TERRAIN
+}
+
+// Bien immobilier en vente
+model Property {
+  id          Int          @id @default(autoincrement())
+  title       String       
+  description String?
+  price       Decimal      @db.Decimal(12, 2)
+  surface     Int          
+  rooms       Int?         
+  address     String
+  city        String
+  zipCode     String
+  type        PropertyType
+  isSold      Boolean      @default(false)
+  images      String[]     @default([])
+  published   Boolean      @default(true)
+  
+  // --- NOUVEAU CHAMP ---
+  // Nous mettons false par défaut car un bien n'est pas favori à sa création
+  isFavorite  Boolean      @default(false) 
+  // ---------------------
+
+  seller      User         @relation(fields: [sellerId], references: [id])
+  sellerId    Int
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([city, type])
+  @@index([isSold])
+}

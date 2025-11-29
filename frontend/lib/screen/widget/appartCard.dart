@@ -180,7 +180,7 @@ class HomeCards extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      homeData['prix'].toString() + " FCFA",
+                    homeData['prix'].toString() + " FCFA",
                       style: TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.w800,

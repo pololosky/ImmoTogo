@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/config/colorParams.dart';
 
 class FavorisPage extends StatelessWidget {
   const FavorisPage({super.key});
@@ -6,20 +7,13 @@ class FavorisPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
-      ),
-
-      body: Center(
-        child: const Text(
-          'FavorisPage',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-          ),
+       appBar: AppBar(
+        title: const Text(
+          'Favoris',
+          style: TextStyle(color: AppConfig.primaryColor),
         ),
       ),
+
     );
   }
 }

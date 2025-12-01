@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screen/detailPage.dart';
 import 'package:frontend/screen/widget/appartCard.dart';
+// Assure-toi d'importer ton service correctement
 import 'package:frontend/services/api_service.dart';
 
-class HouseList extends StatefulWidget {
-  const HouseList({super.key});
-
+class FavoriteProperties extends StatefulWidget {
   @override
-  State<HouseList> createState() => _HouseListState();
+  _FavoritePropertiesState createState() => _FavoritePropertiesState();
 }
 
-class _HouseListState extends State<HouseList> {
+class _FavoritePropertiesState extends State<FavoriteProperties> {
   // Instance du service
   final ApiService apiService = ApiService();
 
@@ -20,11 +20,11 @@ class _HouseListState extends State<HouseList> {
   @override
   void initState() {
     super.initState();
-    fetchHousesProperties();
+    fetchProperties();
   }
 
   // Cette fonction est maintenant beaucoup plus propre
-  Future<void> fetchHousesProperties() async {
+  Future<void> fetchProperties() async {
     try {
       // On remet isLoading à true si on rappelle la fonction (ex: pull-to-refresh)
       // Si c'est le premier chargement, c'est déjà true via la déclaration
@@ -33,7 +33,7 @@ class _HouseListState extends State<HouseList> {
       }
 
       // Appel au service
-      final data = await apiService.getHousesProperties();
+      final data = await apiService.getFavoritesProperties();
 
       if (mounted) {
         setState(() {
@@ -51,7 +51,7 @@ class _HouseListState extends State<HouseList> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -78,7 +78,7 @@ class _HouseListState extends State<HouseList> {
                   ),
                   SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: fetchHousesProperties,
+                    onPressed: fetchProperties,
                     child: Text("Réessayer"),
                   ),
                 ],
@@ -89,12 +89,13 @@ class _HouseListState extends State<HouseList> {
           // RefreshIndicator permet le pull-to-refresh ce qui veut dire que
           // l'utilisateur peut tirer vers le bas pour rafraîchir la liste
           : RefreshIndicator(
-              onRefresh: fetchHousesProperties,
+              onRefresh: fetchProperties,
               child: ListView.builder(
                 padding: EdgeInsets.all(16),
                 itemCount: properties.length,
                 itemBuilder: (context, index) {
                   final property = properties[index];
+                  final int propertyId = property['id'] as int;
 
                   // Adapter les données au format attendu par HomeCards
                   // Note: Idéalement, on créerait un modèle Property.dart
@@ -118,7 +119,21 @@ class _HouseListState extends State<HouseList> {
                     'favoris': property['isFavorite'] ?? true,
                   };
 
-                  return HomeCards(homeData);
+                  // pour afficher les details
+                  return GestureDetector(
+                    onTap: () {
+                      // NAVIGUER VERS LA PAGE DE DÉTAILS
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          // On passe l'ID de la propriété à la page de destination
+                          builder: (context) =>
+                              PropertyDetailPage(propertyId: propertyId),
+                        ),
+                      );
+                    },
+                    child: HomeCards(homeData),
+                  );
                 },
               ),
             ),

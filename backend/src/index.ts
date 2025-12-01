@@ -1,10 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import { prisma } from '../lib/prisma';
-import bcrypt from 'bcrypt';
+import express from "express";
+import cors from "cors";
+import { prisma } from "../lib/prisma";
+import bcrypt from "bcrypt";
 
+// ici c'est pour
 const app = express();
-const PORT = parseInt(process.env.PORT || '3000', 10);
+// ici on voit si on a une variable d'environnement pour le port, sinon on utilise 3000
+const PORT = parseInt(process.env.PORT || "3000", 10);
 
 // Middlewares
 app.use(cors());
@@ -13,16 +15,15 @@ app.use(express.json());
 // ============ ROUTES DE TEST ============
 
 // Route racine pour tester que l'API fonctionne
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'API ImmoApp - Serveur actif ✅',
-    version: '1.0.0'
+app.get("/", (req, res) => {
+  res.json({
+    message: "API ImmoApp - Serveur actif ✅",
+    version: "1.0.0",
   });
 });
 
-
 // Route pour récupérer tous les users
-app.get('/api/users', async (req, res) => {
+app.get("/api/users", async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       include: {
@@ -31,7 +32,9 @@ app.get('/api/users', async (req, res) => {
     });
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors de la récupération des utilisateurs' });
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la récupération des utilisateurs" });
   }
 });
 
@@ -42,14 +45,14 @@ app.get('/api/users', async (req, res) => {
  * POST /api/auth/signup
  * Body: { email, password, name?, phone? }
  */
-app.post('/api/auth/signup', async (req, res) => {
+app.post("/api/auth/signup", async (req, res) => {
   try {
     const { email, password, name, phone } = req.body;
 
     // Validation des champs obligatoires
     if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email et mot de passe sont obligatoires' 
+      return res.status(400).json({
+        error: "Email et mot de passe sont obligatoires",
       });
     }
 
@@ -59,8 +62,8 @@ app.post('/api/auth/signup', async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({ 
-        error: 'Cet email est déjà utilisé' 
+      return res.status(409).json({
+        error: "Cet email est déjà utilisé",
       });
     }
 
@@ -83,7 +86,7 @@ app.post('/api/auth/signup', async (req, res) => {
 
     // Retourner l'utilisateur (sans le mot de passe)
     res.status(201).json({
-      message: 'Utilisateur créé avec succès',
+      message: "Utilisateur créé avec succès",
       user: {
         id: user.id,
         email: user.email,
@@ -94,9 +97,9 @@ app.post('/api/auth/signup', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Erreur lors de l\'inscription:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la création du compte' 
+    console.error("❌ Erreur lors de l'inscription:", error);
+    res.status(500).json({
+      error: "Erreur lors de la création du compte",
     });
   }
 });
@@ -106,14 +109,14 @@ app.post('/api/auth/signup', async (req, res) => {
  * POST /api/auth/login
  * Body: { email, password }
  */
-app.post('/api/auth/login', async (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Validation des champs
     if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email et mot de passe sont obligatoires' 
+      return res.status(400).json({
+        error: "Email et mot de passe sont obligatoires",
       });
     }
 
@@ -123,8 +126,8 @@ app.post('/api/auth/login', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ 
-        error: 'Utilisateur non trouvé' 
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
       });
     }
 
@@ -135,8 +138,8 @@ app.post('/api/auth/login', async (req, res) => {
     const isPasswordValid = true; // À REMPLACER par la ligne ci-dessus
 
     if (!isPasswordValid) {
-      return res.status(401).json({ 
-        error: 'Mot de passe incorrect' 
+      return res.status(401).json({
+        error: "Mot de passe incorrect",
       });
     }
 
@@ -144,7 +147,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     // Retourner l'utilisateur (sans le mot de passe)
     res.json({
-      message: 'Connexion réussie',
+      message: "Connexion réussie",
       user: {
         id: user.id,
         email: user.email,
@@ -155,9 +158,9 @@ app.post('/api/auth/login', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Erreur lors de la connexion:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la connexion' 
+    console.error("❌ Erreur lors de la connexion:", error);
+    res.status(500).json({
+      error: "Erreur lors de la connexion",
     });
   }
 });
@@ -168,37 +171,37 @@ app.post('/api/auth/login', async (req, res) => {
  * Récupère tous les utilisateurs
  * GET /api/users
  */
-app.get('/api/users', async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        createdAt: true,
-        updatedAt: true,
-        // Ne pas retourner le mot de passe
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+// app.get("/api/users", async (req, res) => {
+//   try {
+//     const users = await prisma.user.findMany({
+//       select: {
+//         id: true,
+//         email: true,
+//         name: true,
+//         phone: true,
+//         createdAt: true,
+//         updatedAt: true,
+//         // Ne pas retourner le mot de passe
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
 
-    res.json(users);
-  } catch (error) {
-    console.error('❌ Erreur lors de la récupération des utilisateurs:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la récupération des utilisateurs' 
-    });
-  }
-});
+//     res.json(users);
+//   } catch (error) {
+//     console.error("❌ Erreur lors de la récupération des utilisateurs:", error);
+//     res.status(500).json({
+//       error: "Erreur lors de la récupération des utilisateurs",
+//     });
+//   }
+// });
 
 /**
  * Récupère un utilisateur par son ID
  * GET /api/users/:id
  */
-app.get('/api/users/:id', async (req, res) => {
+app.get("/api/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -215,16 +218,16 @@ app.get('/api/users/:id', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ 
-        error: 'Utilisateur non trouvé' 
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
       });
     }
 
     res.json(user);
   } catch (error) {
-    console.error('❌ Erreur lors de la récupération de l\'utilisateur:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la récupération de l\'utilisateur' 
+    console.error("❌ Erreur lors de la récupération de l'utilisateur:", error);
+    res.status(500).json({
+      error: "Erreur lors de la récupération de l'utilisateur",
     });
   }
 });
@@ -234,7 +237,7 @@ app.get('/api/users/:id', async (req, res) => {
  * PUT /api/users/:id
  * Body: { name?, phone? }
  */
-app.put('/api/users/:id', async (req, res) => {
+app.put("/api/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, phone } = req.body;
@@ -245,8 +248,8 @@ app.put('/api/users/:id', async (req, res) => {
     });
 
     if (!existingUser) {
-      return res.status(404).json({ 
-        error: 'Utilisateur non trouvé' 
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
       });
     }
 
@@ -271,9 +274,9 @@ app.put('/api/users/:id', async (req, res) => {
 
     res.json(updatedUser);
   } catch (error) {
-    console.error('❌ Erreur lors de la mise à jour:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la mise à jour de l\'utilisateur' 
+    console.error("❌ Erreur lors de la mise à jour:", error);
+    res.status(500).json({
+      error: "Erreur lors de la mise à jour de l'utilisateur",
     });
   }
 });
@@ -282,7 +285,7 @@ app.put('/api/users/:id', async (req, res) => {
  * Supprime un utilisateur
  * DELETE /api/users/:id
  */
-app.delete('/api/users/:id', async (req, res) => {
+app.delete("/api/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -292,8 +295,8 @@ app.delete('/api/users/:id', async (req, res) => {
     });
 
     if (!existingUser) {
-      return res.status(404).json({ 
-        error: 'Utilisateur non trouvé' 
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
       });
     }
 
@@ -304,13 +307,13 @@ app.delete('/api/users/:id', async (req, res) => {
 
     console.log(`✅ Utilisateur #${id} supprimé`);
 
-    res.json({ 
-      message: 'Utilisateur supprimé avec succès' 
+    res.json({
+      message: "Utilisateur supprimé avec succès",
     });
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la suppression de l\'utilisateur' 
+    console.error("❌ Erreur lors de la suppression:", error);
+    res.status(500).json({
+      error: "Erreur lors de la suppression de l'utilisateur",
     });
   }
 });
@@ -320,7 +323,7 @@ app.delete('/api/users/:id', async (req, res) => {
  * Récupère tous les biens immobiliers publiés (non vendus)
  * GET /api/properties
  */
-app.get('/api/properties', async (req, res) => {
+app.get("/api/properties", async (req, res) => {
   try {
     const properties = await prisma.property.findMany({
       where: {
@@ -339,7 +342,7 @@ app.get('/api/properties', async (req, res) => {
         zipCode: true,
         type: true,
         images: true,
-        isFavorite:true,
+        isFavorite: true,
         createdAt: true,
         seller: {
           select: {
@@ -349,21 +352,21 @@ app.get('/api/properties', async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     res.json(properties);
   } catch (error) {
-    console.error('Erreur lors de la récupération des biens:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error("Erreur lors de la récupération des biens:", error);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 /**
  * Récupère un bien par ID
  * GET /api/properties/:id
  */
-app.get('/api/properties/:id', async (req, res) => {
+app.get("/api/properties/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const property = await prisma.property.findUnique({
@@ -376,17 +379,17 @@ app.get('/api/properties/:id', async (req, res) => {
     });
 
     if (!property) {
-      return res.status(404).json({ error: 'Bien non trouvé' });
+      return res.status(404).json({ error: "Bien non trouvé" });
     }
 
     res.json(property);
   } catch (error) {
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
 // pour recuperer seulement les biens favoris
-app.get('/api/favorites_properties', async (req, res) => {
+app.get("/api/favorites_properties", async (req, res) => {
   try {
     const properties = await prisma.property.findMany({
       where: {
@@ -406,7 +409,7 @@ app.get('/api/favorites_properties', async (req, res) => {
         zipCode: true,
         type: true,
         images: true,
-        isFavorite:true,
+        isFavorite: true,
         createdAt: true,
         seller: {
           select: {
@@ -416,25 +419,31 @@ app.get('/api/favorites_properties', async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     res.json(properties);
   } catch (error) {
-    console.error('Erreur lors de la récupération des biens:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error("Erreur lors de la récupération des biens:", error);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-// pour recuperer seulement les maisons
-app.get('/api/houses', async (req, res) => {
+// pour recuperer les biens par type
+app.get("/api/properties/type/:type", async (req, res) => {
   try {
     const properties = await prisma.property.findMany({
       where: {
         published: true,
         isSold: false,
-        type: 'MAISON',
+        type: req.params.type as
+          | "APPARTEMENT"
+          | "MAISON"
+          | "TERRAIN"
+          | "VILLA"
+          | "BUREAU"
+          | "MAGASIN",
       },
       select: {
         id: true,
@@ -448,7 +457,7 @@ app.get('/api/houses', async (req, res) => {
         zipCode: true,
         type: true,
         images: true,
-        isFavorite:true,
+        isFavorite: true,
         createdAt: true,
         seller: {
           select: {
@@ -458,19 +467,19 @@ app.get('/api/houses', async (req, res) => {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     res.json(properties);
   } catch (error) {
-    console.error('Erreur lors de la récupération des biens:', error);
-    res.status(500).json({ error: 'Erreur serveur' });
+    console.error("Erreur lors de la récupération des biens:", error);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
 // pour basculer le statut "favori" d'un bien
-app.put('/api/properties/:id/favorite', async (req, res) => {
+app.put("/api/properties/:id/favorite", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -481,7 +490,7 @@ app.put('/api/properties/:id/favorite', async (req, res) => {
     });
 
     if (!existingProperty) {
-      return res.status(404).json({ error: 'Bien non trouvé' });
+      return res.status(404).json({ error: "Bien non trouvé" });
     }
 
     // 2. Basculer l'état (true devient false, false devient true)
@@ -503,8 +512,10 @@ app.put('/api/properties/:id/favorite', async (req, res) => {
 
     res.json(updatedProperty);
   } catch (error) {
-    console.error('❌ Erreur lors du basculement du favori:', error);
-    res.status(500).json({ error: 'Erreur serveur lors de la mise à jour du favori' });
+    console.error("❌ Erreur lors du basculement du favori:", error);
+    res
+      .status(500)
+      .json({ error: "Erreur serveur lors de la mise à jour du favori" });
   }
 });
 
@@ -515,9 +526,6 @@ app.put('/api/properties/:id/favorite', async (req, res) => {
 //   console.log(`📡 API disponible sur http://localhost:${PORT}/api`);
 // });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Serveur démarré`);
-  console.log(`Local:    http://localhost:${PORT}`);
-  console.log(`Réseau:   http://192.168.1.77:${PORT}`);
-  console.log(`API:      http://192.168.1.77:${PORT}/api`);
 });

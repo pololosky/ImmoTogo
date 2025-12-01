@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/navigationBar.dart';
-import 'package:frontend/screen/acceuil.dart';
-import 'navigationBar.dart';
+// import 'package:frontend/navigationBar.dart';
+import 'package:frontend/screen/slpashScreen.dart';
+// import 'package:frontend/screen/acceuil.dart';
+// import 'navigationBar.dart';
 
 
 void main() {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
       ),
-      home:  Navigation(),
+      home:  const SplashScreen(),
     );
   }
 }

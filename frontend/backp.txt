@@ -1,0 +1,60 @@
+-------------------------- FOR HANDLE_LOGIN (AuthScreen) --------------------------
+try {
+      // Appeler l'API de connexion
+      final user = await _apiService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      // Afficher un message de succès
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Bienvenue ${user.name ?? user.email} !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // TODO: Naviguer vers la page d'accueil
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
+        // );
+      }
+    } 
+
+
+-------------------------- FOR HANDLE_SIGNUP (AuthScreen) --------------------------
+
+
+    try {
+      // Appeler l'API d'inscription
+      final user = await _apiService.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim().isEmpty
+            ? null
+            : _nameController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+      );
+
+      // Afficher un message de succès
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Compte créé avec succès ! Bienvenue ${user.name ?? user.email} !',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // TODO: Naviguer vers la page d'accueil
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
+        // );
+      }
+    }

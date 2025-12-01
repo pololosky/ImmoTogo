@@ -8,23 +8,21 @@ class ApiService {
   // Pour émulateur Android: http://10.0.2.2:3000/api
   // Pour émulateur iOS: http://localhost:3000/api
   // Pour device physique: http://VOTRE_IP:3000/api
-  static const String baseUrl = 'http://192.168.1.77:3000/api';
+  static const String baseUrl = 'http://192.168.88.237:3000/api';
 
   /// Headers par défaut pour les requêtes JSON
-  Map<String, String> get _headers => {
-        'Content-Type': 'application/json',
-      };
+  Map<String, String> get _headers => {'Content-Type': 'application/json'};
 
   // ============ AUTHENTIFICATION ============
 
   /// Inscription d'un nouvel utilisateur
-  /// 
+  ///
   /// Paramètres:
   /// - [email]: Email de l'utilisateur (obligatoire)
   /// - [password]: Mot de passe (obligatoire)
   /// - [name]: Nom de l'utilisateur (optionnel)
   /// - [phone]: Numéro de téléphone (optionnel)
-  /// 
+  ///
   /// Retourne l'utilisateur créé
   Future<User> signUp({
     required String email,
@@ -68,11 +66,11 @@ class ApiService {
   }
 
   /// Connexion d'un utilisateur existant
-  /// 
+  ///
   /// Paramètres:
   /// - [email]: Email de l'utilisateur
   /// - [password]: Mot de passe
-  /// 
+  ///
   /// Retourne l'utilisateur connecté
   Future<User> login(String email, String password) async {
     try {
@@ -82,10 +80,7 @@ class ApiService {
           .post(
             Uri.parse('$baseUrl/auth/login'),
             headers: _headers,
-            body: json.encode({
-              'email': email,
-              'password': password,
-            }),
+            body: json.encode({'email': email, 'password': password}),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -109,8 +104,6 @@ class ApiService {
     }
   }
 
-  
-
   // ============ UTILISATEURS ============
 
   /// Récupère tous les utilisateurs
@@ -119,10 +112,7 @@ class ApiService {
       print('📡 Récupération des utilisateurs...');
 
       final response = await http
-          .get(
-            Uri.parse('$baseUrl/users'),
-            headers: _headers,
-          )
+          .get(Uri.parse('$baseUrl/users'), headers: _headers)
           .timeout(const Duration(seconds: 10));
 
       print('📥 Status code: ${response.statusCode}');
@@ -146,10 +136,7 @@ class ApiService {
       print('📡 Récupération de l\'utilisateur #$id...');
 
       final response = await http
-          .get(
-            Uri.parse('$baseUrl/users/$id'),
-            headers: _headers,
-          )
+          .get(Uri.parse('$baseUrl/users/$id'), headers: _headers)
           .timeout(const Duration(seconds: 10));
 
       print('📥 Status code: ${response.statusCode}');
@@ -182,10 +169,7 @@ class ApiService {
           .put(
             Uri.parse('$baseUrl/users/$id'),
             headers: _headers,
-            body: json.encode({
-              'name': name,
-              'phone': phone,
-            }),
+            body: json.encode({'name': name, 'phone': phone}),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -215,10 +199,7 @@ class ApiService {
       print('📡 Récupération des propriétés...');
 
       final response = await http
-          .get(
-            Uri.parse('$baseUrl/properties'),
-            headers: _headers,
-          )
+          .get(Uri.parse('$baseUrl/properties'), headers: _headers)
           .timeout(const Duration(seconds: 10));
 
       print('📥 Status code properties: ${response.statusCode}');
@@ -229,24 +210,23 @@ class ApiService {
         print('✅ ${data.length} propriétés récupérées');
         return data;
       } else {
-        throw Exception('Erreur ${response.statusCode}: Impossible de récupérer les biens');
+        throw Exception(
+          'Erreur ${response.statusCode}: Impossible de récupérer les biens',
+        );
       }
     } catch (e) {
       print('❌ Erreur propriétés: $e');
       rethrow; // On renvoie l'erreur pour que l'UI puisse l'afficher
     }
   }
-  
+
   // recupere les maison
   Future<List<dynamic>> getHousesProperties() async {
     try {
       print('📡 Récupération des propriétés...');
 
       final response = await http
-          .get(
-            Uri.parse('$baseUrl/houses'),
-            headers: _headers,
-          )
+          .get(Uri.parse('$baseUrl/houses'), headers: _headers)
           .timeout(const Duration(seconds: 10));
 
       print('📥 Status code properties: ${response.statusCode}');
@@ -257,7 +237,9 @@ class ApiService {
         print('✅ ${data.length} propriétés récupérées');
         return data;
       } else {
-        throw Exception('Erreur ${response.statusCode}: Impossible de récupérer les biens');
+        throw Exception(
+          'Erreur ${response.statusCode}: Impossible de récupérer les biens',
+        );
       }
     } catch (e) {
       print('❌ Erreur propriétés: $e');
@@ -271,10 +253,7 @@ class ApiService {
       print('📡 Récupération des propriétés...');
 
       final response = await http
-          .get(
-            Uri.parse('$baseUrl/favorites_properties'),
-            headers: _headers,
-          )
+          .get(Uri.parse('$baseUrl/favorites_properties'), headers: _headers)
           .timeout(const Duration(seconds: 10));
 
       print('📥 Status code properties: ${response.statusCode}');
@@ -285,21 +264,55 @@ class ApiService {
         print('✅ ${data.length} propriétés récupérées');
         return data;
       } else {
-        throw Exception('Erreur ${response.statusCode}: Impossible de récupérer les biens');
+        throw Exception(
+          'Erreur ${response.statusCode}: Impossible de récupérer les biens',
+        );
       }
     } catch (e) {
       print('❌ Erreur propriétés: $e');
       rethrow; // On renvoie l'erreur pour que l'UI puisse l'afficher
     }
   }
-  
+
+  // Dans api_service.dart
+
+  // ... (vos méthodes existantes)
+
+  /// Récupère les détails d'une propriété par son ID
+  Future<Map<String, dynamic>> getPropertyDetails(int propertyId) async {
+    try {
+      print('📡 Récupération des détails du bien #$propertyId...');
+
+      final response = await http
+          .get(Uri.parse('$baseUrl/properties/$propertyId'), headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      print('📥 Status code details: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        print('✅ Détails récupérés');
+        return data;
+      } else if (response.statusCode == 404) {
+        throw Exception('Bien non trouvé.');
+      } else {
+        throw Exception(
+          'Erreur ${response.statusCode} lors de la récupération des détails.',
+        );
+      }
+    } catch (e) {
+      print('❌ Erreur détails: $e');
+      rethrow;
+    }
+  }
+
   /// Met à jour le statut favori d'un bien
   /// Bascule l'état favori d'une propriété par son ID
   /// Retourne le nouvel état
   Future<bool> toggleFavoriteStatus(int propertyId) async {
     try {
       print('📝 Bascule du statut favori pour le bien #$propertyId...');
-      
+
       // La route PUT que nous venons de créer
       final response = await http
           .put(
@@ -318,7 +331,9 @@ class ApiService {
       } else if (response.statusCode == 404) {
         throw Exception('Bien non trouvé.');
       } else {
-        throw Exception('Erreur ${response.statusCode} lors de la mise à jour du favori.');
+        throw Exception(
+          'Erreur ${response.statusCode} lors de la mise à jour du favori.',
+        );
       }
     } catch (e) {
       print('❌ Erreur toggle favorite: $e');
@@ -326,7 +341,34 @@ class ApiService {
     }
   }
 
+  // Nouvelle fonction pour les biens filtrés
+  Future<List<dynamic>> getFilteredProperties({required String type}) async {
+    try {
+      print('📡 Récupération des bien du tpe : #$type...');
+
+      final response = await http
+          .get(Uri.parse('$baseUrl/properties/type/$type'), headers: _headers)
+          .timeout(const Duration(seconds: 10));
+
+      print('📥 Status code details: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        // On décode le JSON
+        final List<dynamic> data = json.decode(response.body);
+        print('✅ ${data.length} propriétés récupérées');
+        return data;
+      } else if (response.statusCode == 404) {
+        throw Exception('Biens non trouvé.');
+      } else {
+        throw Exception(
+          'Erreur ${response.statusCode} lors de la récupération des détails.',
+        );
+      }
+    } catch (e) {
+      print('❌ Erreur détails: $e');
+      rethrow;
+    }
+  }
+
 
 }
-
-

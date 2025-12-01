@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-// import 'package:frontend/test_connection.dart';
-// import '../models/user.dart';
+// import 'package:frontend/screen/profile.dart';
 import '../services/api_service.dart';
+
+// modif
+// ... (imports existants)
+// import 'package:http/http.dart'
+//     as http; // Ajoutez cet import pour le API Service
+// import 'dart:convert'; // Ajoutez cet import pour le API Service
+
+// import '../models/user.dart'; // <<< ASSUREZ-VOUS QUE CE CHEMIN EST CORRECT
+// import 'profile_screen.dart'; // <<< NOUVELLE PAGE
 
 /// Écran principal d'authentification
 /// Permet de basculer entre connexion et inscription

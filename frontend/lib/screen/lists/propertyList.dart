@@ -1,18 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:frontend/screen/widget/appartCard.dart';
-import 'package:frontend/services/api_service.dart';
+// reusable_list_screen.dart (ou similaire)
 
-class HouseList extends StatefulWidget {
-  const HouseList({super.key});
+import 'package:flutter/material.dart';
+import 'package:frontend/screen/detailPage.dart';
+// import 'package:frontend/screen/property_detail_page.dart';
+import 'package:frontend/screen/widget/appartCard.dart';
+// import 'package:frontend/services/api_service.dart'; // Pour l'instance d'ApiService
+
+// Définition du type de la fonction de récupération pour plus de clarté
+typedef FetchDataFunction = Future<List<dynamic>> Function();
+
+class PropertyListScreen extends StatefulWidget {
+  // Le paramètre clé : la fonction à exécuter pour charger les données
+  final FetchDataFunction fetchFunction;
+
+  const PropertyListScreen({Key? key, required this.fetchFunction})
+    : super(key: key);
 
   @override
-  State<HouseList> createState() => _HouseListState();
+  _PropertyListScreenState createState() => _PropertyListScreenState();
 }
 
-class _HouseListState extends State<HouseList> {
-  // Instance du service
-  final ApiService apiService = ApiService();
-
+class _PropertyListScreenState extends State<PropertyListScreen> {
   List<dynamic> properties = [];
   bool isLoading = true;
   String? error;
@@ -20,26 +28,24 @@ class _HouseListState extends State<HouseList> {
   @override
   void initState() {
     super.initState();
-    fetchHousesProperties();
+    fetchProperties();
   }
 
-  // Cette fonction est maintenant beaucoup plus propre
-  Future<void> fetchHousesProperties() async {
+  Future<void> fetchProperties() async {
     try {
-      // On remet isLoading à true si on rappelle la fonction (ex: pull-to-refresh)
-      // Si c'est le premier chargement, c'est déjà true via la déclaration
       if (!isLoading) {
         setState(() => isLoading = true);
       }
 
-      // Appel au service
-      final data = await apiService.getHousesProperties();
+      // *** UTILISATION DU PARAMÈTRE DE FONCTION ***
+      final data = await widget.fetchFunction();
+      // *******************************************
 
       if (mounted) {
         setState(() {
           properties = data;
           isLoading = false;
-          error = null; // Reset de l'erreur si succès
+          error = null;
         });
       }
     } catch (e) {
@@ -51,10 +57,11 @@ class _HouseListState extends State<HouseList> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      // Utilisation de Scaffold car c'est maintenant un écran complet
       child: isLoading
           ? Center(child: CircularProgressIndicator())
           : error != null
@@ -64,21 +71,12 @@ class _HouseListState extends State<HouseList> {
                 children: [
                   Icon(Icons.error, color: Colors.red, size: 60),
                   SizedBox(height: 16),
-                  // Affiche un message d'erreur un peu plus propre
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Une erreur est survenue.\nVérifiez votre connexion serveur.",
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text("Erreur : $error", textAlign: TextAlign.center),
                   ),
-                  Text(
-                    "Détail: $error",
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: fetchHousesProperties,
+                    onPressed: fetchProperties,
                     child: Text("Réessayer"),
                   ),
                 ],
@@ -86,24 +84,19 @@ class _HouseListState extends State<HouseList> {
             )
           : properties.isEmpty
           ? Center(child: Text("Aucun bien disponible"))
-          // RefreshIndicator permet le pull-to-refresh ce qui veut dire que
-          // l'utilisateur peut tirer vers le bas pour rafraîchir la liste
           : RefreshIndicator(
-              onRefresh: fetchHousesProperties,
+              onRefresh: fetchProperties,
               child: ListView.builder(
                 padding: EdgeInsets.all(16),
                 itemCount: properties.length,
                 itemBuilder: (context, index) {
                   final property = properties[index];
+                  final int propertyId = property['id'] as int;
 
-                  // Adapter les données au format attendu par HomeCards
-                  // Note: Idéalement, on créerait un modèle Property.dart
-                  // pour faire ce mapping, mais ça fonctionne très bien ici aussi.
+                  // Note: La clé 'isFavorite' et 'id' doivent être garanties par l'API
                   final Map<String, dynamic> homeData = {
-                    // C'EST L'AJOUT CRUCIAL :
-                    'id':
-                        property['id']
-                            as int, // Assurez-vous que l'ID est bien un entier
+                    'id': propertyId,
+                    'isFavorite': property['isFavorite'] ?? false,
                     'image':
                         (property['images'] != null &&
                             (property['images'] as List).isNotEmpty)
@@ -115,10 +108,20 @@ class _HouseListState extends State<HouseList> {
                     'toilette': 1,
                     'surface': property['surface'] ?? 0,
                     'prix': property['price'] ?? 0,
-                    'favoris': property['isFavorite'] ?? true,
                   };
 
-                  return HomeCards(homeData);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PropertyDetailPage(propertyId: propertyId),
+                        ),
+                      );
+                    },
+                    child: HomeCards(homeData),
+                  );
                 },
               ),
             ),

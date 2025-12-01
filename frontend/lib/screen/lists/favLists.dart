@@ -109,7 +109,7 @@ class _FavoritePropertiesState extends State<FavoriteProperties> {
                         ? property['images'][0]
                         : 'assets/villa01.jpg',
                     'title': property['title'] ?? 'Sans titre',
-                    'adresse': '${property['city']}, ${property['zipCode']}',
+                    'adresse': '${property['address']}',
                     'chambre': property['rooms'] ?? 0,
                     'toilette': 1,
                     'surface': property['surface'] ?? 0,

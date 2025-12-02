@@ -43,7 +43,7 @@ app.get("/api/users", async (req, res) => {
 /**
  * Inscription d'un nouvel utilisateur
  * POST /api/auth/signup
- * Body: { email, password, name?, phone? }
+ * Body: { email, password, name, phone }
  */
 app.post("/api/auth/signup", async (req, res) => {
   try {
@@ -67,24 +67,22 @@ app.post("/api/auth/signup", async (req, res) => {
       });
     }
 
-    // Hasher le mot de passe
+    // ✅ ÉTAPE 1 (INSCRIPTION): Hacher le mot de passe avant de le stocker
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Créer l'utilisateur
-    // Note: On stocke le mot de passe hashé dans un champ séparé
-    // Il faudra ajouter ce champ au schéma Prisma
     const user = await prisma.user.create({
       data: {
         email,
         name,
         phone,
-        password: hashedPassword,
+        password: hashedPassword, // <-- Stockage du hachage sécurisé
       },
     });
 
     console.log(`✅ Nouvel utilisateur créé: ${user.email}`);
 
-    // Retourner l'utilisateur (sans le mot de passe)
+    // Retourner l'utilisateur (sans le mot de passe par sécurité)
     res.status(201).json({
       message: "Utilisateur créé avec succès",
       user: {
@@ -111,7 +109,7 @@ app.post("/api/auth/signup", async (req, res) => {
  */
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body; // 'password' est le mot de passe en clair
 
     // Validation des champs
     if (!email || !password) {
@@ -120,26 +118,26 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    // Rechercher l'utilisateur
+    // ✅ ÉTAPE 2 (CONNEXION): Rechercher l'utilisateur UNIQUEMENT par email
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return res.status(404).json({
-        error: "Utilisateur non trouvé",
+      // Pour des raisons de sécurité, le message d'erreur ne doit pas indiquer
+      // si l'email est le problème ou le mot de passe.
+      return res.status(401).json({
+        error: "Email ou mot de passe incorrect.",
       });
     }
 
-    // Vérifier le mot de passe
-    // Note: Ceci nécessite le champ password dans le modèle User
-    // Pour l'instant, on accepte tout mot de passe (à des fins de test)
-    // const isPasswordValid = await bcrypt.compare(password, user.password);
-    const isPasswordValid = true; // À REMPLACER par la ligne ci-dessus
+    // ✅ ÉTAPE 3 (CONNEXION): Comparer le mot de passe en clair avec le hachage stocké
+    // C'est bcrypt.compare qui gère la vérification en interne.
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        error: "Mot de passe incorrect",
+        error: "Email ou mot de passe incorrect.",
       });
     }
 

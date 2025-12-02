@@ -10,15 +10,22 @@ datasource db {
 }
 
 // Utilisateur (vendeur ou acheteur potentiel)
+
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String     @unique
-  name      String?
-  password  String
-  phone     String?
-  properties Property[] // Les biens mis en vente par cet utilisateur
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id            Int         @id @default(autoincrement())
+  email         String      @unique
+  name          String?
+  password      String
+  phone         String?
+  // Nouveau champ pour stocker un token (ex: réinitialisation de mot de passe, vérification d'email)
+  token         String?     @unique
+  // Nouveau champ pour définir la date d'expiration du token
+  tokenExpiry   DateTime?
+
+  properties    Property[] // Les biens mis en vente par cet utilisateur
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 // Type de bien (Maison, Appartement, Terrain)

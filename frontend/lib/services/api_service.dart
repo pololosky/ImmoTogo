@@ -8,22 +8,99 @@ class ApiService {
   // Pour émulateur Android: http://10.0.2.2:3000/api
   // Pour émulateur iOS: http://localhost:3000/api
   // Pour device physique: http://VOTRE_IP:3000/api
-  static const String baseUrl = 'http://192.168.88.237:3000/api';
+  static const String baseUrl = 'http://192.168.7.40:3000/api';
 
   /// Headers par défaut pour les requêtes JSON
-  Map<String, String> get _headers => {'Content-Type': 'application/json'};
+  final Map<String, String> _headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  // Stockage simulé du token (sera géré par l'AuthProvider en réalité)
+  String? _authToken;
+
+  void setToken(String token) {
+    _authToken = token;
+  }
 
   // ============ AUTHENTIFICATION ============
 
   /// Inscription d'un nouvel utilisateur
-  ///
-  /// Paramètres:
-  /// - [email]: Email de l'utilisateur (obligatoire)
-  /// - [password]: Mot de passe (obligatoire)
-  /// - [name]: Nom de l'utilisateur (optionnel)
-  /// - [phone]: Numéro de téléphone (optionnel)
-  ///
   /// Retourne l'utilisateur créé
+  // Future<User> signUp({
+  //   required String email,
+  //   required String password,
+  //   String? name,
+  //   String? phone,
+  // }) async {
+  //   try {
+  //     print('📝 Inscription en cours pour: $email');
+
+  //     final response = await http
+  //         .post(
+  //           Uri.parse('$baseUrl/auth/signup'),
+  //           headers: _headers,
+  //           body: json.encode({
+  //             'email': email,
+  //             'password': password,
+  //             'name': name,
+  //             'phone': phone,
+  //           }),
+  //         )
+  //         .timeout(const Duration(seconds: 10));
+
+  //     print('📥 Status code: ${response.statusCode}');
+
+  //     if (response.statusCode == 201 || response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       print('Inscription réussie');
+  //       return User.fromJson(data['user']);
+  //     } else if (response.statusCode == 409) {
+  //       // Email déjà utilisé
+  //       throw Exception('Cet email est déjà utilisé');
+  //     } else {
+  //       final error = json.decode(response.body);
+  //       throw Exception(error['error'] ?? 'Erreur lors de l\'inscription');
+  //     }
+  //   } catch (e) {
+  //     print('Erreur inscription: $e');
+  //     rethrow;
+  //   }
+  // }
+
+  // /// Connexion d'un utilisateur existant
+  // /// Retourne l'utilisateur connecté
+  // Future<User> login(String email, String password) async {
+  //   try {
+  //     print('🔐 Connexion en cours pour: $email');
+
+  //     final response = await http
+  //         .post(
+  //           Uri.parse('$baseUrl/auth/login'),
+  //           headers: _headers,
+  //           body: json.encode({'email': email, 'password': password}),
+  //         )
+  //         .timeout(const Duration(seconds: 10));
+
+  //     print('📥 Status code: ${response.statusCode}');
+
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       print('✅ Connexion réussie');
+  //       return User.fromJson(data['user']);
+  //     } else if (response.statusCode == 401) {
+  //       throw Exception('Email ou mot de passe incorrect');
+  //     } else if (response.statusCode == 404) {
+  //       throw Exception('Utilisateur non trouvé');
+  //     } else {
+  //       final error = json.decode(response.body);
+  //       throw Exception(error['error'] ?? 'Erreur lors de la connexion');
+  //     }
+  //   } catch (e) {
+  //     print('❌ Erreur connexion: $e');
+  //     rethrow;
+  //   }
+  // }
+
   Future<User> signUp({
     required String email,
     required String password,
@@ -31,8 +108,6 @@ class ApiService {
     String? phone,
   }) async {
     try {
-      print('📝 Inscription en cours pour: $email');
-
       final response = await http
           .post(
             Uri.parse('$baseUrl/auth/signup'),
@@ -46,36 +121,30 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 10));
 
-      print('📥 Status code: ${response.statusCode}');
-
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Inscription réussie');
+        // Supposons que l'API renvoie un objet contenant l'utilisateur et le token
+        // Exemple de réponse attendue: {"user": {...user fields}, "token": "..."}
+        // Il faut modifier User.fromJson pour inclure le token si c'est la structure.
+
+        // Simuler l'intégration du token dans l'objet User pour le Provider
+        data['user']['token'] = data['token'] ?? 'simulated_token_signup';
+
         return User.fromJson(data['user']);
       } else if (response.statusCode == 409) {
-        // Email déjà utilisé
         throw Exception('Cet email est déjà utilisé');
       } else {
         final error = json.decode(response.body);
         throw Exception(error['error'] ?? 'Erreur lors de l\'inscription');
       }
     } catch (e) {
-      print('Erreur inscription: $e');
       rethrow;
     }
   }
 
   /// Connexion d'un utilisateur existant
-  ///
-  /// Paramètres:
-  /// - [email]: Email de l'utilisateur
-  /// - [password]: Mot de passe
-  ///
-  /// Retourne l'utilisateur connecté
   Future<User> login(String email, String password) async {
     try {
-      print('🔐 Connexion en cours pour: $email');
-
       final response = await http
           .post(
             Uri.parse('$baseUrl/auth/login'),
@@ -84,11 +153,12 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 10));
 
-      print('📥 Status code: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('✅ Connexion réussie');
+
+        // Simuler l'intégration du token dans l'objet User pour le Provider
+        data['user']['token'] = data['token'] ?? 'simulated_token_login';
+
         return User.fromJson(data['user']);
       } else if (response.statusCode == 401) {
         throw Exception('Email ou mot de passe incorrect');
@@ -99,9 +169,40 @@ class ApiService {
         throw Exception(error['error'] ?? 'Erreur lors de la connexion');
       }
     } catch (e) {
-      print('❌ Erreur connexion: $e');
       rethrow;
     }
+  }
+
+  Future<dynamic> fetchData(String endpoint) async {
+    if (_authToken == null) {
+      throw Exception('Utilisateur non authentifié.');
+    }
+
+    final authHeaders = {..._headers, 'Authorization': 'Bearer $_authToken'};
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/$endpoint'),
+      headers: authHeaders,
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else if (response.statusCode == 401) {
+      throw Exception('Session expirée. Veuillez vous reconnecter.');
+    } else {
+      throw Exception(
+        'Erreur de chargement des données: ${response.statusCode}',
+      );
+    }
+  }
+ 
+  Future<void> logout() async {
+    // Ici, vous pourriez appeler une API /logout pour invalider le token côté serveur
+    // await http.post(Uri.parse('$baseUrl/auth/logout'), headers: _headers);
+
+    // Dans notre cas, nous simulons simplement la réussite de la déconnexion
+    await Future.delayed(const Duration(milliseconds: 300));
+    print('Déconnexion API réussie (simulée)');
   }
 
   // ============ UTILISATEURS ============
@@ -369,6 +470,4 @@ class ApiService {
       rethrow;
     }
   }
-
-
 }

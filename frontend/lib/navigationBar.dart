@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/config/colorParams.dart';
-import 'package:frontend/screen/auth.dart';
+// import 'package:frontend/screen/auth.dart';
+import 'package:frontend/screen/profileWrapperScreen.dart';
 // import 'package:frontend/screen/lists/favLists.dart';
 // import 'package:frontend/screen/users_screen.dart';
 import 'screen/acceuil.dart';
@@ -22,7 +23,7 @@ class _NavigationState extends State<Navigation> {
     AcceuilPage(),
     const RecherchePage(),
     FavorisPage(),
-    AuthScreen(),
+    const ProfileWrapperScreen(),
   ];
 
   void _onItemTapped(int index) {

@@ -1,15 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:frontend/screen/profile.dart';
-import '../services/api_service.dart';
-
-// modif
-// ... (imports existants)
-// import 'package:http/http.dart'
-//     as http; // Ajoutez cet import pour le API Service
-// import 'dart:convert'; // Ajoutez cet import pour le API Service
-
-// import '../models/user.dart'; // <<< ASSUREZ-VOUS QUE CE CHEMIN EST CORRECT
-// import 'profile_screen.dart'; // <<< NOUVELLE PAGE
+import 'package:frontend/screen/authProvider.dart';
+import 'package:provider/provider.dart';
 
 /// Écran principal d'authentification
 /// Permet de basculer entre connexion et inscription
@@ -26,80 +17,73 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        // Dégradé de fond élégant
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.blue.shade400, Colors.blue.shade700],
-          ),
+    return Container(
+      // Dégradé de fond élégant
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.blue.shade400, Colors.blue.shade700],
         ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Logo ou icône de l'application
-                  Icon(Icons.home_work, size: 80, color: Colors.white),
-                  const SizedBox(height: 16),
+      ),
+      child: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo ou icône de l'application
+                Icon(Icons.home_work, size: 80, color: Colors.white),
+                const SizedBox(height: 16),
 
-                  // Titre de l'application
-                  Text(
-                    'ImmoTogo',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                // Titre de l'application
+                Text(
+                  'ImmoTogo',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 8),
+                ),
+                const SizedBox(height: 8),
 
-                  // Sous-titre
-                  Text(
-                    'Votre plateforme immobilière',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
+                // Sous-titre
+                Text(
+                  'Votre plateforme immobilière',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withOpacity(0.9),
                   ),
-                  const SizedBox(height: 48),
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     await testConnection();
-                  //   },
-                  //   child: Icon(Icons.bug_report),
-                  // ),
-                  // Carte contenant le formulaire
-                  Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: _isSignUp
-                          ? SignUpForm(
-                              onToggle: () {
-                                setState(() {
-                                  _isSignUp = false;
-                                });
-                              },
-                            )
-                          : LoginForm(
-                              onToggle: () {
-                                setState(() {
-                                  _isSignUp = true;
-                                });
-                              },
-                            ),
-                    ),
+                ),
+                const SizedBox(height: 48),
+
+                // Carte contenant le formulaire
+                Card(
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                ],
-              ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: _isSignUp
+                        ? SignUpForm(
+                            onToggle: () {
+                              setState(() {
+                                _isSignUp = false;
+                              });
+                            },
+                          )
+                        : LoginForm(
+                            onToggle: () {
+                              setState(() {
+                                _isSignUp = true;
+                              });
+                            },
+                          ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -119,44 +103,31 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  // Clé du formulaire pour validation
   final _formKey = GlobalKey<FormState>();
-
-  // Contrôleurs pour récupérer les valeurs des champs
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  // Service API
-  final _apiService = ApiService();
-
-  // État de chargement
-  bool _isLoading = false;
-
-  // Afficher/masquer le mot de passe
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    // Libérer les ressources
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   /// Valide et soumet le formulaire de connexion
-  Future<void> _handleLogin() async {
-    // Valider le formulaire
+  Future<void> _handleLogin(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
+    // Récupérer le Provider pour appeler la méthode de connexion
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
     try {
-      // Appeler l'API de connexion
-      final user = await _apiService.login(
+      // NOTE: Le mot de passe est envoyé en clair au Provider, qui doit le comparer
+      // au hachage stocké via une fonction de vérification (e.g. bcrypt.compare)
+      final user = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
@@ -169,66 +140,46 @@ class _LoginFormState extends State<LoginForm> {
             backgroundColor: Colors.green,
           ),
         );
-
-        // TODO: Naviguer vers la page d'accueil
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
-        // );
       }
     } catch (e) {
       // Afficher l'erreur
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('Erreur de connexion: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Écouter l'état de chargement du provider
+    final isLoading = Provider.of<AuthProvider>(context).isLoading;
+
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Titre
-          Text(
-            'Connexion',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          Text('Connexion',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
 
-          // Champ Email
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: 'Email',
               prefixIcon: Icon(Icons.email_outlined),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez entrer votre email';
-              }
-              // Validation basique de l'email
-              if (!value.contains('@')) {
+              if (value == null || value.isEmpty || !value.contains('@')) {
                 return 'Email invalide';
               }
               return null;
@@ -236,7 +187,6 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: 16),
 
-          // Champ Mot de passe
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
@@ -244,18 +194,14 @@ class _LoginFormState extends State<LoginForm> {
               labelText: 'Mot de passe',
               prefixIcon: Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                ),
+                icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                 onPressed: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;
                   });
                 },
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -268,21 +214,15 @@ class _LoginFormState extends State<LoginForm> {
 
           // Bouton de connexion
           ElevatedButton(
-            onPressed: _isLoading ? null : _handleLogin,
+            onPressed: isLoading ? null : () => _handleLogin(context),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: _isLoading
+            child: isLoading
                 ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+                    height: 20, width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                   )
                 : Text('Se connecter', style: TextStyle(fontSize: 16)),
           ),
@@ -294,7 +234,7 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               Text("Pas encore de compte ?"),
               TextButton(
-                onPressed: widget.onToggle,
+                onPressed: isLoading ? null : widget.onToggle,
                 child: Text('S\'inscrire'),
               ),
             ],
@@ -316,29 +256,18 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
-  // Clé du formulaire pour validation
   final _formKey = GlobalKey<FormState>();
-
-  // Contrôleurs pour récupérer les valeurs des champs
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  // Service API
-  final _apiService = ApiService();
-
-  // État de chargement
-  bool _isLoading = false;
-
-  // Afficher/masquer les mots de passe
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    // Libérer les ressources
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -348,45 +277,29 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   /// Valide et soumet le formulaire d'inscription
-  Future<void> _handleSignUp() async {
-    // Valider le formulaire
+  Future<void> _handleSignUp(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      // Appeler l'API d'inscription
-      final user = await _apiService.signUp(
+      final user = await authProvider.signUp(
         email: _emailController.text.trim(),
-        password: _passwordController.text,
-        name: _nameController.text.trim().isEmpty
-            ? null
-            : _nameController.text.trim(),
-        phone: _phoneController.text.trim().isEmpty
-            ? null
-            : _phoneController.text.trim(),
+        password: _passwordController.text, // Le hachage se fait dans le Provider/Backend
+        name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
       );
 
       // Afficher un message de succès
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Compte créé avec succès ! Bienvenue ${user.name ?? user.email} !',
-            ),
+            content: Text('Compte créé avec succès ! Bienvenue ${user.name ?? user.email} !'),
             backgroundColor: Colors.green,
           ),
         );
-
-        // TODO: Naviguer vers la page d'accueil
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
-        // );
       }
     } catch (e) {
       // Afficher l'erreur
@@ -398,28 +311,22 @@ class _SignUpFormState extends State<SignUpForm> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Écouter l'état de chargement du provider
+    final isLoading = Provider.of<AuthProvider>(context).isLoading;
+
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Titre
-          Text(
-            'Inscription',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          Text('Inscription',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -431,15 +338,10 @@ class _SignUpFormState extends State<SignUpForm> {
             decoration: InputDecoration(
               labelText: 'Email *',
               prefixIcon: Icon(Icons.email_outlined),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez entrer votre email';
-              }
-              if (!value.contains('@')) {
+              if (value == null || value.isEmpty || !value.contains('@')) {
                 return 'Email invalide';
               }
               return null;
@@ -453,9 +355,7 @@ class _SignUpFormState extends State<SignUpForm> {
             decoration: InputDecoration(
               labelText: 'Nom',
               prefixIcon: Icon(Icons.person_outline),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
           const SizedBox(height: 16),
@@ -467,9 +367,7 @@ class _SignUpFormState extends State<SignUpForm> {
             decoration: InputDecoration(
               labelText: 'Téléphone',
               prefixIcon: Icon(Icons.phone_outlined),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
           const SizedBox(height: 16),
@@ -482,24 +380,17 @@ class _SignUpFormState extends State<SignUpForm> {
               labelText: 'Mot de passe *',
               prefixIcon: Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                ),
+                icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                 onPressed: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;
                   });
                 },
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez entrer un mot de passe';
-              }
-              if (value.length < 6) {
+              if (value == null || value.length < 6) {
                 return 'Le mot de passe doit contenir au moins 6 caractères';
               }
               return null;
@@ -515,20 +406,14 @@ class _SignUpFormState extends State<SignUpForm> {
               labelText: 'Confirmer le mot de passe *',
               prefixIcon: Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureConfirmPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off,
-                ),
+                icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
                 onPressed: () {
                   setState(() {
                     _obscureConfirmPassword = !_obscureConfirmPassword;
                   });
                 },
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -544,21 +429,15 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Bouton d'inscription
           ElevatedButton(
-            onPressed: _isLoading ? null : _handleSignUp,
+            onPressed: isLoading ? null : () => _handleSignUp(context),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: _isLoading
+            child: isLoading
                 ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+                    height: 20, width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
                   )
                 : Text('S\'inscrire', style: TextStyle(fontSize: 16)),
           ),
@@ -570,7 +449,7 @@ class _SignUpFormState extends State<SignUpForm> {
             children: [
               Text("Déjà un compte ?"),
               TextButton(
-                onPressed: widget.onToggle,
+                onPressed: isLoading ? null : widget.onToggle,
                 child: Text('Se connecter'),
               ),
             ],

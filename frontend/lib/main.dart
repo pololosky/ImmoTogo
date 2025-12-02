@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screen/authProvider.dart';
 // import 'package:frontend/navigationBar.dart';
 import 'package:frontend/screen/slpashScreen.dart';
+import 'package:provider/provider.dart';
 // import 'package:frontend/screen/acceuil.dart';
 // import 'navigationBar.dart';
 
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    // Utilisez MultiProvider si vous avez plusieurs Providers
+    MultiProvider(
+      providers: [
+        // C'est ici que vous définissez le AuthProvider.
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        // Ajoutez d'autres providers ici si nécessaire
+        // ChangeNotifierProvider(create: (context) => OtherProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

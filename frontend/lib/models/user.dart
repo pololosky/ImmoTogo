@@ -4,6 +4,7 @@ class User {
   final String email;
   final String? name;
   final String? phone;
+  final String? token;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -12,6 +13,7 @@ class User {
     required this.email,
     this.name,
     this.phone,
+    this.token,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -23,6 +25,7 @@ class User {
       email: json['email'],
       name: json['name'],
       phone: json['phone'],
+      token: json['token'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -35,6 +38,7 @@ class User {
       'email': email,
       'name': name,
       'phone': phone,
+      'token': token,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -46,6 +50,7 @@ class User {
     String? email,
     String? name,
     String? phone,
+    String? token,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -54,6 +59,7 @@ class User {
       email: email ?? this.email,
       name: name ?? this.name,
       phone: phone ?? this.phone,
+      token: token ?? this.token,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
